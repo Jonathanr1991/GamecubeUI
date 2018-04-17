@@ -1,0 +1,9 @@
+Make sure SDL 2.0 is installed 
+
+Linux terminal command
+
+sudo apt-get install libsdl2-dev
+
+Linxux terminal command to run program 
+
+g++ COSC439.cpp `pkg-config --cflags --libs sdl2`
