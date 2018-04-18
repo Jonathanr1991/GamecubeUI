@@ -47,7 +47,7 @@ class Sprite{
 int main( int argc, char *argv[]){
 	
 	int SCREEN_WIDTH =1280;
-	int SCREEN_HEIGHT =720;
+	int SCREEN_HEIGHT =1024;
 	SDL_Init( SDL_INIT_EVERYTHING );
 	SDL_Window *window=NULL;
 	string currentSelection="Super Mario Sunshine";
@@ -91,7 +91,7 @@ int main( int argc, char *argv[]){
 // Pictures for game menu set up
 	game1=SDL_LoadBMP("sunshine.bmp");
 	game2=SDL_LoadBMP("smash.bmp");
-	game3=SDL_LoadBMP("smash.bmp");
+	game3=SDL_LoadBMP("sonic-heroes-logo.bmp");
 	gameCubeLogo=SDL_LoadBMP("GamecubeLogo.bmp");
 	gameSelector= SDL_LoadBMP("gameSelectorPic.bmp");
 
