@@ -43,9 +43,22 @@ class Sprite{
 		
 		
 };
-
+/*
+void log(char* string) {
+  fprintf(f,string);
+  }*/
 int main( int argc, char *argv[]){
-	
+    FILE* f = NULL;
+    
+    f = fopen("./log.txt", "w+");
+    
+    if (f == NULL) {
+      printf("couldn't open file");
+      exit(1);
+    }
+
+    fprintf(f,"opened log file\n");
+
 	int SCREEN_WIDTH =1280;
 	int SCREEN_HEIGHT =1024;
 	SDL_Init( SDL_INIT_EVERYTHING );
@@ -91,7 +104,7 @@ int main( int argc, char *argv[]){
 // Pictures for game menu set up
 	game1=SDL_LoadBMP("sunshine.bmp");
 	game2=SDL_LoadBMP("smash.bmp");
-	game3=SDL_LoadBMP("sonic-heroes-logo.bmp");
+	game3=SDL_LoadBMP("sonicheroes.bmp");
 	gameCubeLogo=SDL_LoadBMP("GamecubeLogo.bmp");
 	gameSelector= SDL_LoadBMP("gameSelectorPic.bmp");
 
@@ -115,11 +128,18 @@ int main( int argc, char *argv[]){
     SDL_BlitSurface(game3,NULL,screen,&box3);
 
 
+    SDL_GameController *controller = NULL;
 
-
-	
-	 
-
+    for(int i = 0; i < SDL_NumJoysticks(); i++) {
+      if(SDL_IsGameController(i)) {
+	controller = SDL_GameControllerOpen(i);
+	break;
+      }
+    }
+    if (controller == NULL) {
+      fprintf(f,"no controller found\n");
+    }
+    
 	SDL_Event event;
 	bool running = true;
  	//creates loop for the main window
@@ -130,6 +150,9 @@ int main( int argc, char *argv[]){
 			if( event.type == SDL_QUIT){
 				running = false;
 				break;
+			}
+			else if (event.type==SDL_CONTROLLER_BUTTON_A) {
+			  fprintf(f, "A Button Pressed\n");
 			}
 			else if(event.type==SDL_KEYDOWN){
                 switch(event.key.keysym.sym)
