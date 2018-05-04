@@ -15,9 +15,6 @@ class Sprite{
 		SDL_Surface *image;
 		SDL_Rect rect;
 		int origin_x, origin_y;
-
-
-
 	public:
 
 		Sprite(Uint32 color,int x,int y, int w, int h)
@@ -127,9 +124,10 @@ int main( int argc, char *argv[]){
     SDL_BlitSurface(game2,NULL,screen,&box2);
     SDL_BlitSurface(game3,NULL,screen,&box3);
 
-
+    // TODO, make it recognize 4 controllers
     SDL_GameController *controller = NULL;
-
+    SDL_Joystick *joy;
+    
     for(int i = 0; i < SDL_NumJoysticks(); i++) {
       if(SDL_IsGameController(i)) {
 	controller = SDL_GameControllerOpen(i);
@@ -138,107 +136,89 @@ int main( int argc, char *argv[]){
     }
     if (controller == NULL) {
       fprintf(f,"no controller found\n");
+      fprintf(stdout, "critical failure\n");
+      exit(1);
     }
+    else if (controller != NULL) {
+      fprintf(f,"found controller!!!!!!!!!");
+      fprintf(f, SDL_GameControllerMapping(controller));
+      fprintf(f, "\n");
+    }
+
+    joy = SDL_GameControllerGetJoystick(controller);
     
-	SDL_Event event;
-	bool running = true;
- 	//creates loop for the main window
-	while( running) {   // keeps the window open until quit is pressed
-		
-		while( SDL_PollEvent( &event)){
+    SDL_Event event;
+    bool running = true;
+    //creates loop for the main window
+    while( running) {   // keeps the window open until quit is pressed
+      while( SDL_PollEvent( &event)){
 			
-			if( event.type == SDL_QUIT){
-				running = false;
-				break;
-			}
-			else if (event.type==SDL_CONTROLLER_BUTTON_A) {
-			  fprintf(f, "A Button Pressed\n");
-			}
-			else if(event.type==SDL_KEYDOWN){
-                switch(event.key.keysym.sym)
-                {
-			case SDLK_RIGHT:
-				if(currentSelection.compare("Super Mario Sunshine")==0)
-				{
-				gameSelectorLocation.x+=320;
-				currentSelection="Smash Bro";
-				
-				}
-				else if(currentSelection.compare("Smash Bro")==0)
-				{
-				gameSelectorLocation.x+=320;
-				currentSelection="game3";
-				
-				}else if(currentSelection.compare("game3")==0)
-				{
-				
-				currentSelection="game3";
-				
-				}
-				break;
-			
-				
-
-			 case SDLK_LEFT:
-				if(currentSelection.compare("Super Mario Sunshine")==0)
-				{
-				currentSelection="Super Mario Sunshine";
-				
-				}
-				else if(currentSelection.compare("Smash Bro")==0)
-				{
-				gameSelectorLocation.x-=320;
-				currentSelection="Super Mario Sunshine";
-				
-				}else if(currentSelection.compare("game3")==0)
-				{
-				gameSelectorLocation.x-=320;
-				currentSelection="Smash Bros";
-				
-				}
-				
-				break;
-			case SDLK_DOWN:
-				if(currentSelection.compare("Super Mario Sunshine")==0)
-				{
-				currentSelection="setting";
-								}
-				else if(currentSelection.compare("Smash Bro")==0)
-				{
-				
-				currentSelection="setting";
-				
-				}else if(currentSelection.compare("game3")==0)
-				{
-				
-				currentSelection="setting";
-				
-				}
-				break;
-        case SDLK_a:
-             cout<<currentSelection<<endl;
-            running=false;
-                        
-                }
-            }
-            
-            
-           
-
-			
-		
-		
-		
-   
-
+	if( event.type == SDL_QUIT){
+	  running = false;
+	  break;
 	}
+	else if (event.type==SDL_CONTROLLERBUTTONDOWN) {
+	  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+	    fprintf(f, "A Button Pressed\n");
+	  }
+	}
+	else if(event.type==SDL_CONTROLLERBUTTONDOWN){
+	  switch(event.key.keysym.sym)
+	    {
+	    case SDLK_RIGHT:
+	      if(currentSelection.compare("Super Mario Sunshine")==0){
+		gameSelectorLocation.x+=320;
+		currentSelection="Smash Bro";		
+	      }
+		  
+	      else if(currentSelection.compare("Smash Bro")==0) {
+		gameSelectorLocation.x+=320;
+		currentSelection="game3";				
+	      }
+		  
+	      else if(currentSelection.compare("game3")==0) {		
+		currentSelection="game3";
+	      }
+	      break;
+				
+	    case SDLK_LEFT:
+	      if(currentSelection.compare("Super Mario Sunshine")==0) {
+		  currentSelection="Super Mario Sunshine";
+		}
+	      else if(currentSelection.compare("Smash Bro")==0) {
+		  gameSelectorLocation.x-=320;
+		  currentSelection="Super Mario Sunshine";
+				
+		}
+	      else if(currentSelection.compare("game3")==0) {
+		  gameSelectorLocation.x-=320;
+		  currentSelection="Smash Bro";
+		}
+	      
+	      break;
+
+	    case SDLK_DOWN:
+	      if(currentSelection.compare("Super Mario Sunshine")==0) {
+		  currentSelection="setting";
+		}
+	      else if(currentSelection.compare("Smash Bro")==0)	{	  
+		  currentSelection="setting";				
+		}
+	      else if(currentSelection.compare("game3")==0) {	  
+		  currentSelection="setting";		
+		}
+	      break;
+        case SDLK_a:
+	  cout<<currentSelection<<endl;
+	  running=false;
+	    }
+	}
+      
+      }
        
-       SDL_BlitSurface(gameSelector, NULL, screen, &gameSelectorLocation);
+      SDL_BlitSurface(gameSelector, NULL, screen, &gameSelectorLocation);
         
-        SDL_UpdateWindowSurface(window);
-	
-	
-	
+      SDL_UpdateWindowSurface(window);
 	
     }
     SDL_Quit();
