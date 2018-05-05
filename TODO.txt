@@ -1,8 +1,8 @@
 TODO:
-- make 4 controller variables (or an array or something) and keep track of them so that the loader can use 4 contorllers just like the game
-- make the selector work. at each event it should redraw the currently selected image without the white border.
+- make 4 controller variables (or an array or something) and keep track of them so that the loader can use 4 contorllers just like the game (Jonathan R)
+- make the selector work. at each event it should redraw the currently selected image without the white border. (Jonathan R might need help my logic seems wrong somehere and cant find out where)
 - make the event work with the ISOs and make sure it knows how to look for the game images (patrick will do this one)
-- organize the formatting in the event loop to make it look neater
+- organize the formatting in the event loop to make it look neater (Jonathan R)
 - close the controller
 - fix up memory management (i.e. close pointers and stuff, maybe unload everything while the emulator is running)
 - fix the sonic heroes image (patrick will do this too)
