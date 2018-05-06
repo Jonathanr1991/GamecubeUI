@@ -11,31 +11,29 @@ using namespace std;
 
 class Sprite{
 
-	private:
-		SDL_Surface *image;
-		SDL_Rect rect;
-		int origin_x, origin_y;
-	public:
+private:
+  SDL_Surface *image;
+  SDL_Rect rect;
+  int origin_x, origin_y;
+public:
+  Sprite(Uint32 color,int x,int y, int w, int h)  {
+    image = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
 
-		Sprite(Uint32 color,int x,int y, int w, int h)
-		{
-			image = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
+    SDL_FillRect(image, NULL, color);
+    rect= image->clip_rect;
+    origin_x=0;
+    origin_y=0;
+    rect.x=x- origin_x;
+    rect.y=y-origin_y;
 
-			SDL_FillRect(image, NULL, color);
-			rect= image->clip_rect;
-			origin_x=0;
-			origin_y=0;
-			rect.x=x- origin_x;
-			rect.y=y-origin_y;
-		}
+  }
 
-		void update(){
-			}
+  void update(){
+  }
 		
-		void draw(SDL_Surface *destination){
-			
-				SDL_BlitSurface(image,NULL,destination, &rect);
-			}
+  void draw(SDL_Surface *destination){			
+    SDL_BlitSurface(image,NULL,destination, &rect);
+  }
 								
 		
 		
@@ -157,15 +155,44 @@ int main( int argc, char *argv[]){
 	  running = false;
 	  break;
 	}
+
 	else if (event.type==SDL_CONTROLLERBUTTONDOWN) {
 	  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
 	    fprintf(f, "A Button Pressed\n");
 	  }
 	}
-	else if(event.type==SDL_CONTROLLERBUTTONDOWN){
-	  switch(event.key.keysym.sym)
+
+	else if (event.type == SDL_JOYAXISMOTION) {
+	  /*  if (event.jaxis.axis == 0) {
+	    //   std:: cout << event.jaxis.value << std::endl;
+	    fprintf(f, "value: %d\n", event.jaxis.value); 
+	    }*/
+	  if (event.type == SDL_JOYAXISMOTION) {
+	    else if (event.jaxis.value < 8000) {
+	      if (currentSelection.compare("Super Mario Sunshine") == 0) {
+		currentSelection = advanceCurrentSelection(); // implement this method
+		gameSelectorLocation.x = advanceGameSelector(); //implement this method 
+	      }
+	      else if (currentSelection.compare("Smash Bro") == 0) {
+		currentSelection = advanceCurrentSelection();
+		gameSelectorLocation.x = advanceGameSelector();
+	      }
+	      else if (currentSelection.compare("game3") == 0) { // SONIC GOES HERE
+		currentSelection = advanceCurrentSelection(); // i think i have to make this a pointer.
+	      }	      
+	    }
+
+	    else if (event.jaxis.value < -8000) {
+	      
+	    }
+	  }
+	}
+	
+	
+	else if(event.type==SDL_JOYAXISMOTION){
+	  switch(event.jaxis.value)
 	    {
-	    case SDLK_RIGHT:
+	    case 7000:
 	      if(currentSelection.compare("Super Mario Sunshine")==0){
 		gameSelectorLocation.x+=320;
 		currentSelection="Smash Bro";		
@@ -213,7 +240,7 @@ int main( int argc, char *argv[]){
 	  running=false;
 	    }
 	}
-      
+	
       }
        
       SDL_BlitSurface(gameSelector, NULL, screen, &gameSelectorLocation);
