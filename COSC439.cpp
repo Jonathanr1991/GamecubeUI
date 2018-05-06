@@ -6,6 +6,16 @@
 #include "SDL_keycode.h"
 #include "SDL_scancode.h"
 
+#define ADVANCE_LEFT -1
+#define ADVANCE_RIGHT 1
+#define ADVANCE_DOWN 2
+#define ADVANCE_UP 2
+
+#define RIGHT_DEADZONE 8000
+#define LEFT_DEADZONE -8000
+#define DOWN_DEADZONE 8000
+#define UP_DEADZONE -8000
+
 #define fps 60
 using namespace std;
 
@@ -112,6 +122,7 @@ int main( int argc, char *argv[]){
 
 
 
+    
 // game selector 
 	SDL_Rect gameSelectorLocation;
 	gameSelectorLocation.x=(2*SCREEN_WIDTH)/32-10;
@@ -122,28 +133,41 @@ int main( int argc, char *argv[]){
     SDL_BlitSurface(game2,NULL,screen,&box2);
     SDL_BlitSurface(game3,NULL,screen,&box3);
 
-    // TODO, make it recognize 4 controllers
-    SDL_GameController *controller = NULL;
-    SDL_Joystick *joy;
+    SDL_GameController controller[4];
+    
+    for (int i = 0; i < 4; i++) {
+      controller[i] = NULL;
+    }
     
     for(int i = 0; i < SDL_NumJoysticks(); i++) {
       if(SDL_IsGameController(i)) {
-	controller = SDL_GameControllerOpen(i);
+	controller[i] = SDL_GameControllerOpen(i);
 	break;
       }
     }
-    if (controller == NULL) {
-      fprintf(f,"no controller found\n");
-      fprintf(stdout, "critical failure\n");
+    
+    // check to see if theres at least one controller 
+    for (int i = 0; i < 4; i++) {
+      if (controller[i] != NULL) {
+	fprintf(f, "found controller %d\n", i);
+	fprintf(f, SDL_GameControllerMapping());
+	fprintf(f,"\n");
+      }
+    }
+    
+    // if there isn't a controller plugged in, do something about it
+    // TODO make it do something so that a user can just plug a controller in.
+    int nullControllers = 0;
+    for (int i = 0; i < 4; i++) {
+      if (controller[i] == NULL) {
+	nullControllers++;
+      }
+    }
+    
+    if (nullControllers == 4) {
+      fprintf(f, "there's nothing plugged in. exiting\n");
       exit(1);
     }
-    else if (controller != NULL) {
-      fprintf(f,"found controller!!!!!!!!!");
-      fprintf(f, SDL_GameControllerMapping(controller));
-      fprintf(f, "\n");
-    }
-
-    joy = SDL_GameControllerGetJoystick(controller);
     
     SDL_Event event;
     bool running = true;
@@ -159,16 +183,19 @@ int main( int argc, char *argv[]){
 	else if (event.type==SDL_CONTROLLERBUTTONDOWN) {
 	  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
 	    fprintf(f, "A Button Pressed\n");
+	    executeDolphin(currentSelection); 
 	  }
 	}
 
-	else if (event.type == SDL_JOYAXISMOTION) {
-	  /*  if (event.jaxis.axis == 0) {
-	    //   std:: cout << event.jaxis.value << std::endl;
-	    fprintf(f, "value: %d\n", event.jaxis.value); 
+	/*	else if (event.type == SDL_CONTROLLERAXISMOTION) {
+	  /*  if (event.caxis.axis == 0) {
+p	    //   std:: cout << event.caxis.value << std::endl;
+	    fprintf(f, "value: %d\n", event.caxis.value); 
 	    }*/
-	  if (event.type == SDL_JOYAXISMOTION) {
-	    else if (event.jaxis.value < 8000) {
+
+	if (event.type == SDL_CONTROLLERAXISMOTION) {
+	  if (event.caxis.which == 0/*the left and right one*/) {
+	    else if (event.caxis.value < 8000) { // right 
 	      if (currentSelection.compare("Super Mario Sunshine") == 0) {
 		currentSelection = advanceCurrentSelection(); // implement this method
 		gameSelectorLocation.x = advanceGameSelector(); //implement this method 
@@ -182,48 +209,33 @@ int main( int argc, char *argv[]){
 	      }	      
 	    }
 
-	    else if (event.jaxis.value < -8000) {
-	      
+	    else if (event.caxis.value < -8000) { // left
+	      if (currentSelection.compare("Super Mario Sunshine") == 0) {
+		currentSelection = advanceCurrentSelection();
+		gameSelectorLocation.x = advanceGameSelector();
+	      }
+
+	      else if (currentSelection.compare("Smash Bro") == 0) {
+		currentSelection = advanceCurrentSelection();
+		gameSelectorLocation.x = advanceGameSelector();
+	      }
+	    
+	      else if (currentSelection.compare("game3") == 0) {
+		currentSelection = advanceCurrentSelection();
+		gameSelectorLocation.x = advanceGameSelector();
+	      }
+	    }
+	  }
+	  else if (event.caxis.which == 1/*the up and down one*/) {
+	    if(event.caxis.value < -8000) {
+	      currentSelection = setToSettings();
 	    }
 	  }
 	}
-	
-	
-	else if(event.type==SDL_JOYAXISMOTION){
-	  switch(event.jaxis.value)
-	    {
-	    case 7000:
-	      if(currentSelection.compare("Super Mario Sunshine")==0){
-		gameSelectorLocation.x+=320;
-		currentSelection="Smash Bro";		
-	      }
-		  
-	      else if(currentSelection.compare("Smash Bro")==0) {
-		gameSelectorLocation.x+=320;
-		currentSelection="game3";				
-	      }
-		  
-	      else if(currentSelection.compare("game3")==0) {		
-		currentSelection="game3";
-	      }
-	      break;
-				
-	    case SDLK_LEFT:
-	      if(currentSelection.compare("Super Mario Sunshine")==0) {
-		  currentSelection="Super Mario Sunshine";
-		}
-	      else if(currentSelection.compare("Smash Bro")==0) {
-		  gameSelectorLocation.x-=320;
-		  currentSelection="Super Mario Sunshine";
-				
-		}
-	      else if(currentSelection.compare("game3")==0) {
-		  gameSelectorLocation.x-=320;
-		  currentSelection="Smash Bro";
-		}
-	      
-	      break;
-
+      }
+      
+      
+	/*	
 	    case SDLK_DOWN:
 	      if(currentSelection.compare("Super Mario Sunshine")==0) {
 		  currentSelection="setting";
@@ -240,6 +252,7 @@ int main( int argc, char *argv[]){
 	  running=false;
 	    }
 	}
+	*/
 	
       }
        
