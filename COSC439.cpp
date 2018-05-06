@@ -5,6 +5,7 @@
 #include "SDL_keyboard.h"
 #include "SDL_keycode.h"
 #include "SDL_scancode.h"
+#include "Sprite.h"
 
 #define ADVANCE_LEFT -1
 #define ADVANCE_RIGHT 1
@@ -19,39 +20,24 @@
 #define fps 60
 using namespace std;
 
-class Sprite{
-
-private:
-  SDL_Surface *image;
-  SDL_Rect rect;
-  int origin_x, origin_y;
-public:
-  Sprite(Uint32 color,int x,int y, int w, int h)  {
-    image = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
-
-    SDL_FillRect(image, NULL, color);
-    rect= image->clip_rect;
-    origin_x=0;
-    origin_y=0;
-    rect.x=x- origin_x;
-    rect.y=y-origin_y;
-
-  }
-
-  void update(){
-  }
-		
-  void draw(SDL_Surface *destination){			
-    SDL_BlitSurface(image,NULL,destination, &rect);
-  }
-								
-		
-		
-};
 /*
 void log(char* string) {
   fprintf(f,string);
   }*/
+
+void advanceCurrentSelection(int direction) {
+  
+}
+
+void executeDolphin(string* game) {
+  if (game.compare("Smash Bros") == 0)
+    system("dolphin-emu -e melee.iso");
+  if (game.compare("Sonic Heroes") == 0)
+    system("dolphin-emu -e sonicheroes.iso");
+  if (game.compare("Super Mario Sunshine"))
+    system.("dolphin-emu -e mario.iso");
+    
+}
 int main( int argc, char *argv[]){
     FILE* f = NULL;
     
@@ -64,69 +50,71 @@ int main( int argc, char *argv[]){
 
     fprintf(f,"opened log file\n");
 
-	int SCREEN_WIDTH =1280;
-	int SCREEN_HEIGHT =1024;
-	SDL_Init( SDL_INIT_EVERYTHING );
-	SDL_Window *window=NULL;
-	string currentSelection="Super Mario Sunshine";
-	window= SDL_CreateWindow("GameCube", 
-					SDL_WINDOWPOS_UNDEFINED,
-					SDL_WINDOWPOS_UNDEFINED,
-					SCREEN_WIDTH, 
-					SCREEN_HEIGHT,       SDL_WINDOW_RESIZABLE);
+    int SCREEN_WIDTH =1280;
+    int SCREEN_HEIGHT =1024;
+    SDL_Init( SDL_INIT_EVERYTHING );
+    SDL_Window *window=NULL;
+    string currentSelection="Super Mario Sunshine";
+    window= SDL_CreateWindow("GameCube", 
+			     SDL_WINDOWPOS_UNDEFINED,
+			     SDL_WINDOWPOS_UNDEFINED,
+			     SCREEN_WIDTH, 
+			     SCREEN_HEIGHT,       SDL_WINDOW_RESIZABLE);
 
-	SDL_Surface *screen = SDL_GetWindowSurface(window);
+    SDL_Surface *screen = SDL_GetWindowSurface(window);
+
+    SDL_Renderer *renderer;
+
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    
+    SDL_Surface *game1,*game2, *game3=NULL;
+    SDL_Surface *gameCubeLogo, *gameSelector=NULL;
+    Uint32 blue = SDL_MapRGB(screen->format,0,0,150);
+    Uint32 blue2 = SDL_MapRGB(screen->format,0,0,255);
+    Uint32 white = SDL_MapRGB(screen->format,255,255,255);
+    //main background color
+    SDL_FillRect(screen, NULL, blue2);
+    //Game 1 location main menu
+    SDL_Rect box;
+    box.x=(2*SCREEN_WIDTH)/32;
+    box.y=(6*SCREEN_HEIGHT)/18;
+    // game 2 location
+    SDL_Rect box2;
+    box2.x=(10*SCREEN_WIDTH)/32;
+    box2.y=box.y;
+    // game 3 location
+    SDL_Rect box3;
+    box3.x=(10*SCREEN_WIDTH)/32 +320;
+    box3.y=box.y;
+
+    SDL_Rect logoLocation;
+    logoLocation.x=(10*SCREEN_WIDTH)/32;
+    logoLocation.y=10;
 
 
-
-	SDL_Surface *game1,*game2, *game3=NULL;
-	SDL_Surface *gameCubeLogo, *gameSelector=NULL;
-	Uint32 blue = SDL_MapRGB(screen->format,0,0,150);
-	Uint32 blue2 = SDL_MapRGB(screen->format,0,0,255);
-	Uint32 white = SDL_MapRGB(screen->format,255,255,255);
-	//main background color
-	SDL_FillRect(screen, NULL, blue2);
-	//Game 1 location main menu
-	SDL_Rect box;
-	box.x=(2*SCREEN_WIDTH)/32;
-	box.y=(6*SCREEN_HEIGHT)/18;
-	// game 2 location
-	SDL_Rect box2;
-	box2.x=(10*SCREEN_WIDTH)/32;
-	box2.y=box.y;
-	// game 3 location
-	SDL_Rect box3;
-	box3.x=(10*SCREEN_WIDTH)/32 +320;
-	box3.y=box.y;
-
-	SDL_Rect logoLocation;
-	logoLocation.x=(10*SCREEN_WIDTH)/32;
-	logoLocation.y=10;
-
-	SDL_Event keyPress;
 	
 
-// Pictures for game menu set up
-	game1=SDL_LoadBMP("sunshine.bmp");
-	game2=SDL_LoadBMP("smash.bmp");
-	game3=SDL_LoadBMP("sonicheroes.bmp");
-	gameCubeLogo=SDL_LoadBMP("GamecubeLogo.bmp");
-	gameSelector= SDL_LoadBMP("gameSelectorPic.bmp");
+    // Pictures for game menu set up
+    game1=SDL_LoadBMP("sunshine.bmp");
+    game2=SDL_LoadBMP("smash.bmp");
+    game3=SDL_LoadBMP("sonicheroes.bmp");
+    gameCubeLogo=SDL_LoadBMP("GamecubeLogo.bmp");
+    gameSelector= SDL_LoadBMP("gameSelectorPic.bmp");
 
-	Sprite topBox( blue,0,0, SCREEN_WIDTH,3*SCREEN_HEIGHT/18);
-	topBox.draw(screen);
-	Sprite bottomBox(blue,0,SCREEN_HEIGHT-SCREEN_HEIGHT/6,SCREEN_WIDTH, SCREEN_HEIGHT/6); 
-	bottomBox.draw(screen);
-	Sprite pressAToStartGame(white, (11*SCREEN_WIDTH)/32, (16*SCREEN_HEIGHT)/18, (10*SCREEN_WIDTH)/32, (SCREEN_HEIGHT)/18);
-	pressAToStartGame.draw(screen);
-
-
+    Sprite topBox( blue,0,0, SCREEN_WIDTH,3*SCREEN_HEIGHT/18);
+    
+    Sprite bottomBox(blue,0,SCREEN_HEIGHT-SCREEN_HEIGHT/6,SCREEN_WIDTH, SCREEN_HEIGHT/6); 
+    bottomBox.draw(screen);
+    Sprite pressAToStartGame(white, (11*SCREEN_WIDTH)/32, (16*SCREEN_HEIGHT)/18, (10*SCREEN_WIDTH)/32, (SCREEN_HEIGHT)/18);
+    pressAToStartGame.draw(screen);
 
     
-// game selector 
-	SDL_Rect gameSelectorLocation;
-	gameSelectorLocation.x=(2*SCREEN_WIDTH)/32-10;
-	gameSelectorLocation.y = (6*SCREEN_HEIGHT)/18-10;
+
+    
+    // game selector 
+    SDL_Rect gameSelectorLocation;
+    gameSelectorLocation.x=(2*SCREEN_WIDTH)/32-10;
+    gameSelectorLocation.y = (6*SCREEN_HEIGHT)/18-10;
 	
     SDL_BlitSurface(gameCubeLogo,NULL,screen,&logoLocation);
     SDL_BlitSurface(game1,NULL,screen,&box);
@@ -195,7 +183,7 @@ p	    //   std:: cout << event.caxis.value << std::endl;
 
 	if (event.type == SDL_CONTROLLERAXISMOTION) {
 	  if (event.caxis.which == 0/*the left and right one*/) {
-	    else if (event.caxis.value < 8000) { // right 
+	    else if (event.caxis.value < RIGHT_DEADZONE) { // right 
 	      if (currentSelection.compare("Super Mario Sunshine") == 0) {
 		currentSelection = advanceCurrentSelection(); // implement this method
 		gameSelectorLocation.x = advanceGameSelector(); //implement this method 
