@@ -6,6 +6,7 @@
 #include "SDL_keycode.h"
 #include "SDL_scancode.h"
 #include "Sprite.h"
+#include <SDL_gamecontroller.h>
 
 #define ADVANCE_LEFT -1
 #define ADVANCE_RIGHT 1
@@ -29,11 +30,7 @@ void log(char* string) {
   fprintf(f,string);
   }*/
 
-void advanceCurrentSelection(int direction) {
-  
-}
-
-void executeDolphin(string game) {
+void executeDolphin(string game) { // TODO put macros here
   if (game.compare("Smash Bros") == 0)
     system("dolphin-emu -e melee.iso");
   if (game.compare("Sonic Heroes") == 0)
@@ -52,7 +49,7 @@ void advanceSelection(SDL_Renderer *r, SDL_Texture *tex, SDL_Rect *src, SDL_Rect
 int main( int argc, char *argv[]){
     FILE* f = NULL;
     
-    f = fopen("./log.txt", "w+");
+    f = fopen("./log.txt", "w+"); // TODO Make the log file do more.
     
     if (f == NULL) {
       printf("couldn't open file");
@@ -144,42 +141,31 @@ int main( int argc, char *argv[]){
     // render the selector at the game 1 rect.
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, gameSelectorTexture, NULL, &box);
-    gameSelectorLocation = box;
+    gameSelectorLocation = &box;
     // CONTROLLERS
-    SDL_GameController controller[4];
+    SDL_GameController controller1 = NULL;
+    SDL_GameController controller2 = NULL;
+    SDL_GameController controller3 = NULL;
+    SDL_GameController controller4 = NULL;
+
+
     
-    for (int i = 0; i < 4; i++) {
-      controller[i] = NULL;
-    }
+    int i = 0;
     
-    for(int i = 0; i < SDL_NumJoysticks(); i++) {
-      if(SDL_IsGameController(i)) {
-    	  controller[i] = SDL_GameControllerOpen(i);
-      }
-    }
+    controller1 = SDL_GameControllerOpen(i);
+    i++;
+    controller2 = SDL_GameControllerOpen(i);
+    i++;
+    controller3 = SDL_GameControllerOpen(i);
+    i++;
+    controller4 = SDL_GameControllerOpen(i);
     
     // check to see if theres at least one controller 
-    for (int i = 0; i < 4; i++) {
-      if (controller[i] != NULL) {
-    	  fprintf(f, "found controller %d\n", i);
-    	  //fprintf(f, SDL_GameControllerMapping(controller[i]));
-    	  fprintf(f,"\n");
-      }
-    }
     
     // if there isn't a controller plugged in, do something about it
     // TODO make it do something so that a user can just plug a controller in.
-    int nullControllers = 0;
-    for (int i = 0; i < 4; i++) {
-      if (controller[i] == NULL) {
-    	  nullControllers++;
-      }
-    }
-    
-    if (nullControllers == 4) {
-      fprintf(f, "there's nothing plugged in. exiting\n");
-      exit(1);
-    }
+    // run an idle loop.
+
     
     SDL_Event event;
     bool running = true;
@@ -198,25 +184,25 @@ int main( int argc, char *argv[]){
 						  if (SDL_RectEquals(gameSelectorLocation, &box) == SDL_TRUE) { // super mario sunshine is selected
 							  if (event.caxis.value < RIGHT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box, &box2);
-								  gameSelectorLocation = box2;
+								  gameSelectorLocation = &box2;
 							  }
 						  }
 
 						  if (SDL_RectEquals(gameSelectorLocation, &box2) == SDL_TRUE) { // smash is selected
 							  if (event.caxis.value < LEFT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box2, &box);
-								  gameSelectorLocation = box;
+								  gameSelectorLocation = &box;
 							  }
 							  else if (event.caxis.value < RIGHT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box2, &box3);
-								  gameSelectorLocation = box3;
+								  gameSelectorLocation = &box3;
 							  }
 						  }
 
 						  if (SDL_RectEquals(gameSelectorLocation, &box3) == SDL_TRUE) { // sonic heroes is selected.
 							  if(event.caxis.value < LEFT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box3, &box2);
-								  gameSelectorLocation = box2;
+								  gameSelectorLocation = &box2;
 							  }
 						  }
 					  }
@@ -224,7 +210,7 @@ int main( int argc, char *argv[]){
 			  }
 
 			  if (event.type == SDL_CONTROLLERBUTTONDOWN) {
-				  if (event.button == SDL_CONTROLLER_BUTTON_A) {
+				  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
 					  if (SDL_RectEquals(gameSelectorLocation, &box) == SDL_TRUE)
 						  executeDolphin(SUNSHINE);
 					  if (SDL_RectEquals(gameSelectorLocation, &box2) == SDL_TRUE)
