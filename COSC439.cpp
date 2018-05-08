@@ -110,9 +110,7 @@ int main( int argc, char *argv[]){
       printf("screen is null, exiting\n");
       exit(1);
     }
-    SDL_Renderer *renderer;
 
-    renderer = SDL_CreateRenderer(window, -1, 0);
     printf("inited renderer\n");
     SDL_Surface *game1,*game2, *game3=NULL;
     SDL_Surface *gameCubeLogo, *gameSelector=NULL;
@@ -144,14 +142,12 @@ int main( int argc, char *argv[]){
     printf("made logo box\n");
     
     // set the color for clearing the renderer to the background color
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // TODO figure out how to put blue2 here.
-    printf("set renderer draw color\n");
     // Pictures for game menu set up
-    game1=SDL_LoadBMP("sunshine.bmp");
-    game2=SDL_LoadBMP("smash.bmp");
-    game3=SDL_LoadBMP("sonicheroes.bmp");
-    gameCubeLogo=SDL_LoadBMP("GamecubeLogo.bmp");
-    gameSelector= SDL_LoadBMP("gameSelectorPic.bmp");
+    game1=SDL_LoadBMP("img/sunshine.bmp");
+    game2=SDL_LoadBMP("img/smash.bmp");
+    game3=SDL_LoadBMP("img/sonicheroes.bmp");
+    gameCubeLogo=SDL_LoadBMP("img/GamecubeLogo.bmp");
+    gameSelector= SDL_LoadBMP("img/gameSelectorPic.bmp");
     printf("inited BMPs\n");
 
     // create sprites
@@ -173,38 +169,32 @@ int main( int argc, char *argv[]){
     gameSelectorLocation.y = (6*SCREEN_HEIGHT)/18-10;
     printf("inited gameSelector rect\n");
     // init the texture for the selector icon
-    SDL_Texture *gameSelectorTexture = NULL;
-    gameSelectorTexture = SDL_CreateTextureFromSurface(renderer, gameSelector);
-    printf("created texture from surface\n");
-    SDL_FreeSurface(gameSelector);
-    printf("freed surface\n");
     
     // blit static BMPs
-    if (gameCubeLogo != NULL && screen != NULL) {
-      SDL_BlitSurface(gameCubeLogo,NULL,screen,&logoLocation);
-      printf("blitted logo\n");
-    }
-    else {
-      printf("can't blit, exiting\n");
-      exit(1);
-    }   
-    
+
+    SDL_BlitSurface(gameCubeLogo,NULL,screen,&logoLocation);
+    printf("blitted logo\n");    
     SDL_BlitSurface(game1,NULL,screen,&box);
     printf("blitted game1\n");
     SDL_BlitSurface(game2,NULL,screen,&box2);
     printf("blittled game2\n");
     SDL_BlitSurface(game3,NULL,screen,&box3);
     printf("blittled game 3\n");
-    printf("blited bmps\n");
-    if (window != NULL) {
-      SDL_UpdateWindowSurface(window);
-    }
-    else {
-      printf("window is null\n");
-      exit(1);
-    }
-    printf("updated window surface\n");
+    
+    SDL_UpdateWindowSurface(window);
+    printf("updated window surface");
+    //    printf("updated window surface\n");
     // render the selector at the game 1 rect.
+    SDL_Renderer *renderer;
+
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // TODO figure out how to put blue2 here.
+    printf("set renderer draw color\n");
+    
+    SDL_Texture *gameSelectorTexture = NULL;
+    gameSelectorTexture = SDL_CreateTextureFromSurface(renderer, gameSelector);
+    printf("created texture from surface\n");
+    SDL_FreeSurface(gameSelector);
     SDL_RenderClear(renderer);
     printf("cleared renderer\n");
     SDL_RenderCopy(renderer, gameSelectorTexture, NULL, &box);
@@ -213,6 +203,7 @@ int main( int argc, char *argv[]){
     printf("called renderpresent\n");
     gameSelectorLocation_p = &box;
     printf( "rendered selector initially\n");
+    
     SDL_GameController *controller;
     printf("controller created\n");
 
@@ -252,6 +243,7 @@ int main( int argc, char *argv[]){
 							  if (event.caxis.value < RIGHT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box, &box2);
 								  gameSelectorLocation_p = &box2;
+								  printf("box1: moving right: %d\n", event.caxis.value);
 							  }
 						  }
 
@@ -259,10 +251,12 @@ int main( int argc, char *argv[]){
 							  if (event.caxis.value < LEFT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box2, &box);
 								  gameSelectorLocation_p = &box;
+								  printf("box2: moving left: %d\n", event.caxis.value);
 							  }
 							  else if (event.caxis.value < RIGHT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box2, &box3);
 								  gameSelectorLocation_p = &box3;
+								  printf("box2: moving right: %d\n", event.caxis.value);
 							  }
 						  }
 
@@ -270,6 +264,7 @@ int main( int argc, char *argv[]){
 							  if(event.caxis.value < LEFT_DEADZONE) {
 								  advanceSelection(renderer, gameSelectorTexture, &box3, &box2);
 								  gameSelectorLocation_p = &box2;
+								  printf("box3: moving left: %d\n", event.caxis.value);
 							  }
 						  }
 					  }
