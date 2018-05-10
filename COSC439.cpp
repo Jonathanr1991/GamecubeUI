@@ -220,7 +220,7 @@ int main( int argc, char *argv[]){
 	   controllerExists = false;
 	   printf("No controllers found\n");
     }
-    while(!contollerExists){
+    while(!controllerExists){
 	    if(controller != NULL){
 	    printf("Controller(s) found\n");
 	    controllerExists = true;
