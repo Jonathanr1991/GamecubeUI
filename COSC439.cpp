@@ -215,11 +215,14 @@ int main( int argc, char *argv[]){
       }
     }
     // check to see if theres at least one controller 
-    boolean controllerExists = false;
+    boolean controllerExists;
+    if(controller == NULL){
+	   controllerExists = false;
+	   printf("No controllers found\n");
+    }
     while(!contollerExists){
-	printf("No controllers found\n");
-	if(controller != NULL){
-	    printf("Controller found\n");
+	    if(controller != NULL){
+	    printf("Controller(s) found\n");
 	    controllerExists = true;
 	}
     }
