@@ -215,9 +215,13 @@ int main( int argc, char *argv[]){
       }
     }
     // check to see if theres at least one controller 
-    if (controller == NULL) {
-      printf("No controllers exiting\n");
-      exit(1);
+    boolean controllerExists = false;
+    while(!contollerExists){
+	printf("No controllers found\n");
+	if(controller != NULL){
+	    printf("Controller found\n");
+	    controllerExists = true;
+	}
     }
     // if there isn't a controller plugged in, do something about it
     // TODO make it do something so that a user can just plug a controller in.
