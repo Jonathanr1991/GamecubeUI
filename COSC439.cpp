@@ -223,6 +223,7 @@ int main( int argc, char *argv[]){
     else {
 	    controllerExists = true;
     }
+    //TODO Prompt user to plug in controller HERE
     while(!controllerExists){
 	  for (int i = 0; i < SDL_NumJoysticks(); i++) {
               if (SDL_IsGameController(i)) {
