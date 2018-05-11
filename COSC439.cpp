@@ -220,6 +220,9 @@ int main( int argc, char *argv[]){
 	   controllerExists = false;
 	   printf("No controllers found\n");
     }
+    else {
+	    controllerExists = true;
+    }
     while(!controllerExists){
 	  for (int i = 0; i < SDL_NumJoysticks(); i++) {
               if (SDL_IsGameController(i)) {
