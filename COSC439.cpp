@@ -221,15 +221,15 @@ int main( int argc, char *argv[]){
 	   printf("No controllers found\n");
     }
     while(!controllerExists){
-	    if(controller != NULL){
-	    printf("Controller(s) found\n");
-	    controllerExists = true;
-	}
+	  for (int i = 0; i < SDL_NumJoysticks(); i++) {
+              if (SDL_IsGameController(i)) {
+	          controller=SDL_GameControllerOpen(i);
+	          printf("found controller\n");
+	          controllerExists = true;
+	          break;
+	      }
+	  }
     }
-    // if there isn't a controller plugged in, do something about it
-    // TODO make it do something so that a user can just plug a controller in.
-    // run an idle loop.
-
     
     SDL_Event event;
     bool running = true;
