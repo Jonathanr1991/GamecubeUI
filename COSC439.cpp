@@ -9,42 +9,58 @@
 #include <SDL_gamecontroller.h>
 
 #define BMPSIZE 240
-#define LEFT_DEADZONE -8000
-#define RIGHT_DEADZONE 8000
+#define LEFT_DEADZONE -30000
+#define RIGHT_DEADZONE 30000
 
 #define ADVANCE_LEFT -1
 #define ADVANCE_RIGHT 1
 #define ADVANCE_DOWN 2
 #define ADVANCE_UP 2
 
-#define SMASH "Smash Bros"
+#define MELEE "Smash Bros"
 #define SONICHEROES "Sonic Heroes"
 #define SUNSHINE "Super Mario Sunshine"
 
 #define fps 60
 using namespace std;
+SDL_Rect box1;
+SDL_Rect box2;
+SDL_Rect box3;
+SDL_Rect logo;
+SDL_Rect selectorRect;
+
+// global variables. 
 
 void printRect(SDL_Rect *r) {
   printf("x: %d y: %d, w: %d, h: %d\n", r->x, r->y, r->w, r->h);
 }
 
-void executeDolphin(string game) { // TODO put macros here
-  if (game.compare("Smash Bros") == 0)
-    system("dolphin-emu -e melee.iso");
-  if (game.compare("Sonic Heroes") == 0)
-    system("dolphin-emu -e sonicheroes.iso");
+void executeDolphin(string game, SDL_Window *w) { // TODO put macros here
+  SDL_HideWindow(w);
+  if (game.compare("Smash Bros") == 0) 
+    system("dolphin-emu -e iso/melee.iso");
+  if (game.compare("Sonic Heroes") == 0) 
+    system("dolphin-emu -e iso/sonicheroes.iso");
   if (game.compare("Super Mario Sunshine") == 0)
-	  system("dolphin-emu -e supermariosunshine.iso");
+    system("dolphin-emu -e iso/supermariosunshine.iso ");
     
 }
 
 void advanceSelection(SDL_Renderer *r, SDL_Texture *tex, SDL_Rect *src, SDL_Rect *dest) {
-  printf("advancing selection\n");
-  SDL_RenderClear(r);
   SDL_RenderCopy(r, tex, src, dest);
   SDL_RenderPresent(r);
 }
 
+void renderTextures(SDL_Renderer *r, SDL_Texture *texs[], SDL_Rect *rects[], int size) {
+  SDL_SetRenderDrawColor(r, 0,0,255,255); // set to blue to fill background
+  SDL_RenderClear(r);
+  SDL_SetRenderDrawColor(r,255,255,255,255); // white rectangle. 
+  for (int i = 0; i < size; i++) {
+    SDL_RenderCopy(r, texs[i], NULL, rects[i]);
+  }
+  SDL_RenderDrawRect(r, rects[size]);
+  SDL_RenderPresent(r);
+}
 
 int main( int argc, char *argv[]){
     FILE* f = NULL;
@@ -67,7 +83,7 @@ int main( int argc, char *argv[]){
 			     SDL_WINDOWPOS_UNDEFINED,
 			     SDL_WINDOWPOS_UNDEFINED,
 			     SCREEN_WIDTH, 
-			     SCREEN_HEIGHT,       SDL_WINDOW_FULLSCREEN);
+			     SCREEN_HEIGHT,       SDL_WINDOW_MAXIMIZED);
     if (window!= NULL)
       printf("created window\n");
     
@@ -76,14 +92,28 @@ int main( int argc, char *argv[]){
       printf("screen is null, exiting\n");
       exit(1);
     }
+    
+    SDL_GameController *controller;
 
+    for (int i = 0; i < SDL_NumJoysticks(); i++) {
+      if (SDL_IsGameController(i)) {
+	  controller = SDL_GameControllerOpen(i);
+	  break;
+      }
+    }
+    
+    if (controller == NULL) {
+      printf("no controllers found, exiting\n");
+      exit(1);
+    }
+    
     //    SDL_Rect box1, box2, box3, box4, logoRect; // rects we're gonna render to
     SDL_Rect box1 = { (2*SCREEN_WIDTH)/32, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE};
     SDL_Rect box2 = { (10*SCREEN_WIDTH)/32, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE };
     SDL_Rect box3 = { ((10*SCREEN_WIDTH) / 32)+320, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE};
     SDL_Rect logoRect = { (10*SCREEN_WIDTH)/32, 10, 768, 176 };
-    SDL_Rect *gameSelectorLocation = &box1;
-    
+
+    SDL_Rect selectorRect = { box1.x-5, box1.y-5, BMPSIZE+10, BMPSIZE+10};
     printf("box1: ");
     printRect(&box1);
     printf("box2: ");
@@ -92,6 +122,9 @@ int main( int argc, char *argv[]){
     printRect(&box3);
     printf("logo: ");
     printRect(&logoRect);
+    printf("selectorRect: ");
+    printRect(&selectorRect);
+   
     
 
     // surfaces we're gonnna create the textures with
@@ -117,26 +150,24 @@ int main( int argc, char *argv[]){
     game3 = SDL_CreateTextureFromSurface(renderer, game3s);
     logo = SDL_CreateTextureFromSurface(renderer, logos);
     gameSelector = SDL_CreateTextureFromSurface(renderer, gameSelectors);
-    
+
     SDL_FreeSurface(game1s);
     SDL_FreeSurface(game2s);
     SDL_FreeSurface(game3s);
     SDL_FreeSurface(logos);
     SDL_FreeSurface(gameSelectors);
-    // render games
 
-    SDL_RenderCopy(renderer, game1, NULL, &box1);
-    SDL_RenderCopy(renderer, game2, NULL, &box2);
-    SDL_RenderCopy(renderer, game3, NULL, &box3);
-    SDL_RenderCopy(renderer, logo, NULL, &logoRect);
-    SDL_RenderPresent(renderer);
-    
+    SDL_Texture *textures[] = { game1, game2, game3, logo }; 
+    SDL_Rect *rects[] = { &box1, &box2, &box3, &logoRect, &selectorRect };
+    bool gameLoaded = false;
+    // render selector
     SDL_Event event;
     bool running = true;
+    bool youveGoneBackToZero = false;
     //creates loop for the main window
-    while(running) {   // keeps the window open until quit is pressed
+    while(running && !gameLoaded) {   // keeps the window open until quit is pressed
 		  while(SDL_PollEvent( &event)){
-		    printf("entered event loop\n");
+		    //printf("entered event loop\n");
 			  if(event.type == SDL_QUIT){
 				  running = false;
 				  break;
@@ -144,56 +175,67 @@ int main( int argc, char *argv[]){
 
 			  if (event.type == SDL_CONTROLLERAXISMOTION) {
 			    printf("event axis motion\n");
-				  if (event.caxis.which == 0) { // TODO MAKE SURE THIS WORKS WITH THE RIGHT AXIS!!!!!!!!!! IS THIS THE LEFT/RIGHT OR UP/DOWN ONE?
-					  if (event.caxis.value < LEFT_DEADZONE) {
-						  if (SDL_RectEquals(gameSelectorLocation, &box1) == SDL_TRUE) { // super mario sunshine is selected
-							  if (event.caxis.value < RIGHT_DEADZONE) {
-								  advanceSelection(renderer, gameSelector, &box1, &box2);
-								  gameSelectorLocation = &box2;
-								  printf("box1: moving right: %d\n", event.caxis.value);
-							  }
-						  }
-
-						  if (SDL_RectEquals(gameSelectorLocation, &box2) == SDL_TRUE) { // smash is selected
-							  if (event.caxis.value < LEFT_DEADZONE) {
-								  advanceSelection(renderer, gameSelector, &box2, &box1);
-								  gameSelectorLocation = &box1;
-								  printf("box2: moving left: %d\n", event.caxis.value);
-							  }
-							  else if (event.caxis.value < RIGHT_DEADZONE) {
-								  advanceSelection(renderer, gameSelector, &box2, &box3);
-								  gameSelectorLocation = &box3;
-								  printf("box2: moving right: %d\n", event.caxis.value);
-							  }
-						  }
-
-						  if (SDL_RectEquals(gameSelectorLocation, &box3) == SDL_TRUE) { // sonic heroes is selected.
-							  if(event.caxis.value < LEFT_DEADZONE) {
-								  advanceSelection(renderer, gameSelector, &box3, &box2);
-								  gameSelectorLocation = &box2;
-								  printf("box3: moving left: %d\n", event.caxis.value);
-							  }
-						  }
-					  }
-				  }
+			    if (event.caxis.which == 0) {
+			      if (!youveGoneBackToZero && event.caxis.value > LEFT_DEADZONE && event.caxis.value < RIGHT_DEADZONE) {
+				youveGoneBackToZero = true; 
+			      }
+			      if (event.caxis.value < LEFT_DEADZONE && youveGoneBackToZero) {
+				youveGoneBackToZero = false;
+				switch (selectorRect.x){
+				case 395:
+				  selectorRect.x -=320;
+				  break;
+				case 715:
+				  selectorRect.x -= 320;
+				  break;
+				}
+			      }
+			      if (event.caxis.value > RIGHT_DEADZONE && youveGoneBackToZero) {
+				youveGoneBackToZero = false;
+				switch(selectorRect.x) {
+				case 395:
+				  selectorRect.x += 320;
+				  break;
+				case 75:
+				  selectorRect.x += 320;
+				  break;
+				}
+			      }
+			    }
 			  }
+			
 
-			  if (event.type == SDL_CONTROLLERBUTTONDOWN) {
+			      if (event.type == SDL_CONTROLLERBUTTONDOWN) {
 				  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
-					  if (SDL_RectEquals(gameSelectorLocation, &box1) == SDL_TRUE)
-						  executeDolphin(SUNSHINE);
-					  if (SDL_RectEquals(gameSelectorLocation, &box2) == SDL_TRUE)
-						  executeDolphin(SMASH);
-					  if (SDL_RectEquals(gameSelectorLocation, &box3) == SDL_TRUE)
-						  executeDolphin(SONICHEROES);
+				    if (selectorRect.x == (80-5)) { 
+				      gameLoaded = true;
+				      executeDolphin(SUNSHINE, window);
+				    }
+				    if (selectorRect.x == (400-5)) {
+				      gameLoaded = true;
+				      executeDolphin(MELEE, window);
+				    }
+				    if (selectorRect.x == (720-5)) {
+				      gameLoaded = true;
+				      executeDolphin(SONICHEROES, window);
+				    }
 				  }
 
-			  }
+			      }
+			  
+			  
+			  //  SDL_RenderPresent(renderer);
 		  } // end pollevent loop
+	          renderTextures(renderer, textures, rects, 4); // render textures while running
     } // end main loop
-    
-    SDL_UpdateWindowSurface(window);
-    
+    // free up some memory
+    SDL_DestroyTexture(game1);
+    SDL_DestroyTexture(game2);
+    SDL_DestroyTexture(game3);
+    SDL_DestroyTexture(logo);
+    SDL_GameControllerClose(controller);
+    SDL_FreeSurface(screen);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }
