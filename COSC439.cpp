@@ -9,8 +9,8 @@
 #include <SDL_gamecontroller.h>
 
 #define BMPSIZE 240
-#define LEFT_DEADZONE -30000
-#define RIGHT_DEADZONE 30000
+#define LEFT_DEADZONE -28000
+#define RIGHT_DEADZONE 28000
 
 #define ADVANCE_LEFT -1
 #define ADVANCE_RIGHT 1
@@ -38,11 +38,11 @@ void printRect(SDL_Rect *r) {
 void executeDolphin(string game, SDL_Window *w) { // TODO put macros here
   SDL_HideWindow(w);
   if (game.compare("Smash Bros") == 0) 
-    system("dolphin-emu -e iso/melee.iso");
+    system("dolphin-emu -e /usr/local/GamecubeUI/iso/melee.iso");
   if (game.compare("Sonic Heroes") == 0) 
-    system("dolphin-emu -e iso/sonicheroes.iso");
+    system("dolphin-emu -e /usr/local/GamecubeUI/iso/sonicheroes.iso");
   if (game.compare("Super Mario Sunshine") == 0)
-    system("dolphin-emu -e iso/supermariosunshine.iso ");
+    system("dolphin-emu -e /usr/local/GamecubeUI/iso/supermariosunshine.iso ");
     
 }
 
@@ -52,7 +52,7 @@ void advanceSelection(SDL_Renderer *r, SDL_Texture *tex, SDL_Rect *src, SDL_Rect
 }
 
 void renderTextures(SDL_Renderer *r, SDL_Texture *texs[], SDL_Rect *rects[], int size) {
-  SDL_SetRenderDrawColor(r, 0,0,255,255); // set to blue to fill background
+  SDL_SetRenderDrawColor(r, 153,51,255,255); // set to blue to fill background
   SDL_RenderClear(r);
   SDL_SetRenderDrawColor(r,255,255,255,255); // white rectangle. 
   for (int i = 0; i < size; i++) {
@@ -95,22 +95,39 @@ int main( int argc, char *argv[]){
     
     SDL_GameController *controller;
 
-    for (int i = 0; i < SDL_NumJoysticks(); i++) {
+    for (int i = 0; i < 4; i++) {
       if (SDL_IsGameController(i)) {
-	  controller = SDL_GameControllerOpen(i);
-	  break;
+	controller = SDL_GameControllerOpen(i);
+	printf("found controller\n");
+	break;
       }
     }
-    
+
+    bool controllerExists;
     if (controller == NULL) {
-      printf("no controllers found, exiting\n");
-      exit(1);
+      controllerExists = false;
+      printf("No controllers found\n");
+    }
+    else {
+      controllerExists = true;
+    }
+
+    while(!controllerExists) {
+      for (int i = 0; i < 4; i++) {
+	if (SDL_IsGameController(i)) {
+	  controller = SDL_GameControllerOpen(i);
+	  printf("found controller\n");
+	  controllerExists = true;
+	  break;
+	}
+	printf("no controller found\n");
+      }
     }
     
     //    SDL_Rect box1, box2, box3, box4, logoRect; // rects we're gonna render to
     SDL_Rect box1 = { (2*SCREEN_WIDTH)/32, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE};
-    SDL_Rect box2 = { (10*SCREEN_WIDTH)/32, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE };
-    SDL_Rect box3 = { ((10*SCREEN_WIDTH) / 32)+320, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE};
+    SDL_Rect box2 = { (13*SCREEN_WIDTH)/32, (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE };
+    SDL_Rect box3 = { ((24*SCREEN_WIDTH) / 32), (6*SCREEN_HEIGHT)/18, BMPSIZE, BMPSIZE};
     SDL_Rect logoRect = { (10*SCREEN_WIDTH)/32, 10, 768, 176 };
 
     SDL_Rect selectorRect = { box1.x-5, box1.y-5, BMPSIZE+10, BMPSIZE+10};
@@ -134,15 +151,15 @@ int main( int argc, char *argv[]){
     SDL_Surface  *logos;
     SDL_Surface *gameSelectors;
     
-    game1s = SDL_LoadBMP("res/sunshine.bmp");
-    game2s = SDL_LoadBMP("res/melee.bmp");
-    game3s = SDL_LoadBMP("res/sonicheroes.bmp");
-    logos = SDL_LoadBMP("res/gamecubelogo.bmp");
-    gameSelectors = SDL_LoadBMP("res/selector.bmp");
+    game1s = SDL_LoadBMP("/usr/local/GamecubeUI/res/sunshine.bmp");
+    game2s = SDL_LoadBMP("/usr/local/GamecubeUI/res/melee.bmp");
+    game3s = SDL_LoadBMP("/usr/local/GamecubeUI/res/sonicheroes.bmp");
+    logos = SDL_LoadBMP("/usr/local/GamecubeUI/res/gamecubelogo.bmp");
+    gameSelectors = SDL_LoadBMP("/usr/local/GamecubeUI/res/selector.bmp");
     
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_SetRenderDrawColor(renderer, 0,0,255,255);
+    SDL_SetRenderDrawColor(renderer, 153,51,255,255);
     SDL_RenderClear(renderer);
     SDL_Texture *game1, *game2, *game3, *logo, *gameSelector;
     game1 = SDL_CreateTextureFromSurface(renderer, game1s);
@@ -172,7 +189,7 @@ int main( int argc, char *argv[]){
 				  running = false;
 				  break;
 			  }
-
+#define RECT_DISTANCE 440
 			  if (event.type == SDL_CONTROLLERAXISMOTION) {
 			    printf("event axis motion\n");
 			    if (event.caxis.which == 0) {
@@ -182,22 +199,22 @@ int main( int argc, char *argv[]){
 			      if (event.caxis.value < LEFT_DEADZONE && youveGoneBackToZero) {
 				youveGoneBackToZero = false;
 				switch (selectorRect.x){
-				case 395:
-				  selectorRect.x -=320;
+				case 515:
+				  selectorRect.x -= RECT_DISTANCE;
 				  break;
-				case 715:
-				  selectorRect.x -= 320;
+				case 955:
+				  selectorRect.x -= RECT_DISTANCE;
 				  break;
 				}
 			      }
 			      if (event.caxis.value > RIGHT_DEADZONE && youveGoneBackToZero) {
 				youveGoneBackToZero = false;
 				switch(selectorRect.x) {
-				case 395:
-				  selectorRect.x += 320;
+				case 515:
+				  selectorRect.x += RECT_DISTANCE;
 				  break;
 				case 75:
-				  selectorRect.x += 320;
+				  selectorRect.x += RECT_DISTANCE;
 				  break;
 				}
 			      }
@@ -207,15 +224,15 @@ int main( int argc, char *argv[]){
 
 			      if (event.type == SDL_CONTROLLERBUTTONDOWN) {
 				  if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
-				    if (selectorRect.x == (80-5)) { 
+				    if (selectorRect.x == (box1.x-5)) { 
 				      gameLoaded = true;
 				      executeDolphin(SUNSHINE, window);
 				    }
-				    if (selectorRect.x == (400-5)) {
+				    if (selectorRect.x == (box2.x-5)) {
 				      gameLoaded = true;
 				      executeDolphin(MELEE, window);
 				    }
-				    if (selectorRect.x == (720-5)) {
+				    if (selectorRect.x == (box3.x-5)) {
 				      gameLoaded = true;
 				      executeDolphin(SONICHEROES, window);
 				    }
