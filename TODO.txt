@@ -1,19 +1,18 @@
 
-* TODO make 4 controller variables (or an array or something) and keep track of them so that the loader can use 4 contorllers just like the game (Jonathan R)
-* TODO make an idle loop for if no controllers are plugged in. 
-* TODO make the selector work. at each event it should redraw the currently selected image without the white border. (Jonathan R might need help my logic seems wrong somehere and cant find out where)
+* DONE make an idle loop for if no controllers are plugged in. 
+* DONE make the selector work. at each event it should redraw the currently selected image without the white border. (Jonathan R might need help my logic seems wrong somehere and cant find out where)
 * DONE make the event work with the ISOs and make sure it knows how to look for the game images (patrick will do this one)
-* TODO put the isos in a directory on the dolphinbox
+* DONE put the isos in a directory on the dolphinbox
 * DONE organize the formatting in the event loop to make it look neater (Jonathan R)
-* TODO fix up memory management (i.e. close pointers and stuff, maybe unload everything while the emulator is running)
+* DONE fix up memory management (i.e. close pointers and stuff, maybe unload everything while the emulator is running)
 * DONE fix the sonic heroes image (patrick will do this too)
 * DONE implement advancer methods. these take an int, -1 for moving left, 0 for not moving, 1 for right. 2 for up, -2 for down (patrick)
 * DONE implement executeDolphin() which takes the current selection and either starts the emulator or draws the appropriate screen. (patrick)
-* DONE #define for ADVANCE_LEFT, ADVANCE_RIGHT, ADVANCE_DOWN, ADVANCE_UP for the advancer methods and RIGHT_DEADZONE and LEFT_DEADZONE
-* TODO implement some initialization stuff and others as static methods, make the code look better, less cluttered. 
+* DONE implement some initialization stuff and others as static methods, make the code look better, less cluttered. 
 * TODO Presentation
-* TODO put the hardware back together (patrick)
+* TODO Report 
+* DONE put the hardware back together (patrick)
 * TODO make log file do more (jonathon z)
-* TODO make sure video set up works in the room. 
-* TODO test and make sure 4 player smash works. 
-* TODO (maybe) put a semaphore to ensure mutual exclusion during the selection. 
+* DONE make sure video set up works in the room. 
+* DONE test and make sure 4 player smash works. 
+
